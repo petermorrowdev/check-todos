@@ -88,7 +88,7 @@ def iter_todos(glob, prefix):
                 yield todo
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'path',
@@ -145,3 +145,7 @@ if __name__ == '__main__':
         case 'jsonl':
             for todo in untracked_todos + tracked_todos:
                 print(json.dumps(asdict(todo)))
+
+
+if __name__ == '__main__':
+    main()

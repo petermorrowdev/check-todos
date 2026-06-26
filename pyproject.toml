@@ -10,3 +10,6 @@ dependencies = [
     "tree-sitter-python",
     "tree-sitter-typescript",
 ]
+
+[project.scripts]
+check-todos = "check_todos.__main__:main"
