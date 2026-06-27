@@ -6,10 +6,15 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "tree-sitter",
-    "tree-sitter-html",
-    "tree-sitter-python",
-    "tree-sitter-typescript",
 ]
 
 [project.scripts]
 check-todos = "check_todos.__main__:main"
+
+[project.optional-dependencies]
+html = ["tree-sitter-html"]
+py = ["tree-sitter-python"]
+toml = ["tree-sitter-toml"]
+ts = ["tree-sitter-typescript"]
+tsx = ["tree-sitter-typescript"]
+yaml = ["tree-sitter-yaml"]

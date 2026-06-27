@@ -1,44 +1,34 @@
+import importlib
+from dataclasses import dataclass
+
 from tree_sitter import Language
 
 
 def import_language(extension):
-    langs = {
-        '.py': import_py_language,
-        '.html': import_html_language,
-        '.ts': import_ts_language,
-        '.tsx': import_tsx_language,
-        # TODO: check for shebang if missing suffix
-        '': ...,
-    }
+    for lang in LANGUAGES:
+        if lang.extension == extension:
+            mod = importlib.import_module(lang.module)
+            lang_func = getattr(mod, lang.function)
+            return Language(lang_func())
 
-    try:
-        return langs[extension]()
-    except KeyError:
-        raise LanguageNotFoundError(extension)
+    raise LanguageNotFoundError(extension)
 
 
-def import_py_language():
-    import tree_sitter_python
-
-    return Language(tree_sitter_python.language())
-
-
-def import_html_language():
-    import tree_sitter_html
-
-    return Language(tree_sitter_html.language())
+@dataclass
+class Lang:
+    extension: str
+    module: str
+    function: str = 'language'
 
 
-def import_ts_language():
-    import tree_sitter_typescript
-
-    return Language(tree_sitter_typescript.language_typescript())
-
-
-def import_tsx_language():
-    import tree_sitter_typescript
-
-    return Language(tree_sitter_typescript.language_tsx())
+LANGUAGES = [
+    Lang('.html', 'tree_sitter_html'),
+    Lang('.py', 'tree_sitter_python'),
+    Lang('.toml', 'tree_sitter_toml'),
+    Lang('.ts', 'tree_sitter_typescript', 'language_typescript'),
+    Lang('.tsx', 'tree_sitter_typescript', 'language_tsx'),
+    Lang('.yaml', 'tree_sitter_yaml'),
+]
 
 
 class LanguageNotFoundError(KeyError):
