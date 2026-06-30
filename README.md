@@ -1,3 +1,3 @@
 # check-todos
 
-Check for untracked TODO comments in production.
+Check for untracked TODO comments.
