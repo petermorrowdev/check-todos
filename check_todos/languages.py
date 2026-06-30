@@ -7,7 +7,10 @@ from tree_sitter import Language
 def import_language(extension):
     for lang in LANGUAGES:
         if lang.extension == extension:
-            mod = importlib.import_module(lang.module)
+            try:
+                mod = importlib.import_module(lang.module)
+            except ImportError:
+                raise LanguageNotInstalledError(lang)
             lang_func = getattr(mod, lang.function)
             return Language(lang_func())
 
@@ -35,3 +38,9 @@ class LanguageNotFoundError(KeyError):
     def __init__(self, extension):
         self.extension = extension
         super().__init__(f'Unknown file extension: "{self.extension}"')
+
+
+class LanguageNotInstalledError(KeyError):
+    def __init__(self, lang):
+        self.lang = lang
+        super().__init__(f'Language not installed: `{self.lang.module}`')

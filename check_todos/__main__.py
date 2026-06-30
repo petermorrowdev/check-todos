@@ -11,7 +11,11 @@ from typing import Literal
 
 from tree_sitter import Parser, Query, QueryCursor
 
-from check_todos.languages import LanguageNotFoundError, import_language
+from check_todos.languages import (
+    LanguageNotFoundError,
+    LanguageNotInstalledError,
+    import_language,
+)
 from check_todos.rich import blue, green, red, red_bold
 
 
@@ -39,7 +43,8 @@ def iter_todos(path, pattern):
 
     try:
         query, parser = comment_parser(path.suffix)
-    except LanguageNotFoundError:
+    except (LanguageNotFoundError, LanguageNotInstalledError):
+        # TODO: handle each with deduplicated warning message
         return
 
     raw_source = path.read_bytes()
