@@ -81,6 +81,22 @@ def iter_todos(path, pattern):
             yield todo
 
 
+def print_todos_context(todos):
+    for todo in todos:
+        print()
+        print(
+            '  ',
+            blue('--->'),
+            f'{todo.relative_path}:{todo.line_no}',
+        )
+        print(blue('    |'))
+        for line_no, line in todo.context:
+            line_number = f'{line_no:4d}' if line_no else '    '
+            print(blue(f'{line_number}|'), line)
+        print(blue('    |'))
+    print()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -98,10 +114,9 @@ def main():
         default='summary',
         help='Output report format',
     )
+    parser.add_argument('--prefix', nargs='*', help='Optional issue ID prefix.')
     parser.add_argument(
-        '--prefix',
-        nargs='*',
-        help='Optional issue ID prefix.',
+        '--issue', nargs='*', help='Only check TODOs with this issue ID'
     )
     args = parser.parse_args()
 
@@ -145,31 +160,34 @@ def main():
                 else:
                     untracked_todos.append(todo)
 
+    if args.issue:
+        untracked_todos = []
+        tracked_todos = [t for t in tracked_todos if t.issue in args.issue]
+
     match args.output:
         case 'summary':
-            if untracked_todos:
-                for todo in untracked_todos:
-                    print()
-                    print(
-                        '  ',
-                        blue('--->'),
-                        f'{todo.relative_path}:{todo.line_no}',
-                    )
-                    print(blue('    |'))
-                    for line_no, line in todo.context:
-                        line_number = f'{line_no:4d}' if line_no else '    '
-                        print(blue(f'{line_number}|'), line)
-                    print(blue('    |'))
-                print()
+            if args.issue:
+                i = ', '.join(args.issue)
+                if tracked_todos:
+                    print_todos_context(tracked_todos)
 
-                print(red_bold(f'{len(untracked_todos)} untracked todos found'))
-                sys.exit(1)
-
-            elif tracked_todos:
-                print(green(f'{len(tracked_todos)} tracked todos'))
+                    print(red_bold(f'{len(tracked_todos)} todos found for {i}'))
+                    sys.exit(1)
+                else:
+                    print(f'no todos found for {i}')
 
             else:
-                print('no todos')
+                if untracked_todos:
+                    print_todos_context(untracked_todos)
+
+                    print(red_bold(f'{len(untracked_todos)} untracked todos found'))
+                    sys.exit(1)
+
+                elif tracked_todos:
+                    print(green(f'{len(tracked_todos)} tracked todos'))
+
+                else:
+                    print('no todos')
         case 'jsonl':
             for todo in untracked_todos + tracked_todos:
                 print(json.dumps(asdict(todo)))
